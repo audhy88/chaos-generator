@@ -6,10 +6,20 @@ from huggingface_hub import InferenceClient
 # Page Configuration
 st.set_page_config(page_title="Chaos Generator", page_icon="🌀")
 
-# Sidebar for API Key Management
-st.sidebar.title("Settings")
-api_key = st.sidebar.text_input("Enter Gemini API Key", type="password")
-hf_token = st.sidebar.text_input("Enter Hugging Face Token", type="password")
+# --- Smart Secret Management ---
+# If keys are in the Cloud vault, use them silently. Otherwise, show the sidebar.
+if "GEMINI_API_KEY" in st.secrets:
+    api_key = st.secrets["GEMINI_API_KEY"]
+else:
+    st.sidebar.title("Settings")
+    api_key = st.sidebar.text_input("Enter Gemini API Key", type="password")
+
+if "HF_TOKEN" in st.secrets:
+    hf_token = st.secrets["HF_TOKEN"]
+else:
+    if "GEMINI_API_KEY" not in st.secrets: # Only show title once
+        pass 
+    hf_token = st.sidebar.text_input("Enter Hugging Face Token", type="password")
 
 # Initialize clients
 gemini_client = genai.Client(api_key=api_key) if api_key else None
